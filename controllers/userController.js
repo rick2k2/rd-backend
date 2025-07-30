@@ -124,6 +124,22 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+exports.testinguser = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({
+      success: true,
+      message: "Users fetched successfully",
+      data: users,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch users",
+      error: err.message,
+    });
+  }
+};
 // // forget password
 // exports.forgotPassword = asyncHandler(async (req, res) => {
 //   const { email, newPassword } = req.body;
