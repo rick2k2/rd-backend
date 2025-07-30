@@ -12,7 +12,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://rd-frontend.onrender.com",
-      "https://rd-frontend-xi.vercel.app/",
+      "https://rd-frontend-xi.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
