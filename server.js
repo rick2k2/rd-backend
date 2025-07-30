@@ -9,7 +9,11 @@ const app = express();
 // Middlewares
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://rd-frontend.onrender.com"],
+    origin: [
+      "http://localhost:3000",
+      "https://rd-frontend.onrender.com",
+      "https://rd-frontend-xi.vercel.app/",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
@@ -34,6 +38,9 @@ app.use("/api/admin", adminRoutes);
 
 const postRoutes = require("./routes/postRoutes");
 app.use("/api/posts", postRoutes);
+
+const billRoutes = require("./routes/billRoutes");
+app.use("/api/bills", billRoutes);
 
 app.get("/", (req, res) => {
   res.send(`<h1>Welcome to the Rick Dresses API!</h1>`);
