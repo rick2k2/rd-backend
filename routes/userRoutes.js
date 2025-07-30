@@ -12,13 +12,13 @@ const {
 
 const { protect, admin } = require("../middlewares/authMiddleware");
 
+router.get("/test", testinguser);
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/allusers", protect, admin, getAllUsers);
 router.delete("/:id", protect, admin, deleteUser);
 router.get("/:id", getUserById);
 router.put("/:id", protect, admin, updateUser);
-router.get("/test", testinguser);
 
 // router.post("/forgot-password", protect, forgotPassword);
 
