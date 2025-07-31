@@ -6,14 +6,18 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-// Middlewares
+const allowedOrigins = [
+  "https://rd-frontend-vert.vercel.app",
+  "http://localhost:3000",
+];
+
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://rd-frontend-xi.vercel.app"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 // Routes
