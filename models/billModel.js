@@ -5,6 +5,7 @@ const billSchema = new mongoose.Schema(
   {
     customerName: String,
     phone: String,
+    address: String,
     items: [
       {
         productName: String,
@@ -13,6 +14,8 @@ const billSchema = new mongoose.Schema(
       },
     ],
     totalAmount: Number,
+    paidAmount: Number,
+    dueAmount: Number,
   },
   { timestamps: true }
 );
