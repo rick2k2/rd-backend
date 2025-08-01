@@ -6,6 +6,7 @@ const {
   deleteOrder,
   markOrderDelivered,
   getMyOrders,
+  cancelOrderByAdmin,
 } = require("../controllers/orderController");
 
 const { protect, admin } = require("../middlewares/authMiddleware");
@@ -17,6 +18,7 @@ router.post("/", protect, createOrder);
 router.get("/admin/allorders", protect, admin, getAllOrders);
 router.delete("/delete/:id", protect, admin, deleteOrder);
 router.put("/deliver/:id", protect, admin, markOrderDelivered);
+router.put("/cancel/:id", cancelOrderByAdmin);
 
 // 👤 Get logged-in user's order history
 router.get("/my", protect, getMyOrders);

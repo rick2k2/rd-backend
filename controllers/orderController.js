@@ -62,3 +62,20 @@ exports.getMyOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({ user: req.user._id });
   res.json(orders);
 });
+
+// cancel order  admin
+exports.cancelOrderByAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { cancelledBy, cancelReason } = req.body;
+
+  const order = await Order.findById(id);
+  if (!order) return res.status(404).json({ message: "Order not found" });
+
+  order.status = "Cancelled";
+  order.cancelledBy = cancelledBy || "admin";
+  order.cancelReason = cancelReason || "No reason provided";
+
+  await order.save();
+
+  res.json({ message: "Order cancelled" });
+});

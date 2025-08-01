@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+
+const upload = require("../middlewares/upload");
+
 const {
   getAllProducts,
   getProductById,
@@ -8,10 +11,19 @@ const {
   updateProduct,
 } = require("../controllers/productController");
 
-// Public Routes
-router.post("/", createProduct);
+// Create new product with image upload
+router.post("/", upload.single("image"), createProduct);
+
+// Get all products
 router.get("/", getAllProducts);
+
+// Get single product by ID
 router.get("/:id", getProductById);
+
+// Delete a product by ID
 router.delete("/:id", deleteProduct);
-router.put("/:id", updateProduct);
+
+// Update product by ID with image upload support
+router.put("/:id", upload.single("image"), updateProduct);
+
 module.exports = router;

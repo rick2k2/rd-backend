@@ -12,9 +12,11 @@ const orderSchema = new mongoose.Schema({
   total: Number,
   status: {
     type: String,
-    enum: ["Pending", "Delivered"],
+    enum: ["Pending", "Delivered", "Cancelled"],
     default: "Pending",
   },
+  cancelledBy: { type: String, default: null },
+  cancelReason: { type: String, default: null },
   createdAt: {
     type: Date,
     default: Date.now,
