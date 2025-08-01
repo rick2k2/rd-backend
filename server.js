@@ -10,7 +10,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://rd-frontend-vert.vercel.app",
+    origin: "https://rd-frontend.onrender.com",
     credentials: true,
   })
 );
