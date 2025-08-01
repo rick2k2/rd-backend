@@ -6,14 +6,15 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-const allowedOrigins = [process.env.FRONTEND_URL];
+// const allowedOrigins = [process.env.FRONTEND_URL];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: "https://rd-frontend-vert.vercel.app",
     credentials: true,
   })
 );
+app.options("*", cors());
 
 app.use(express.json());
 
