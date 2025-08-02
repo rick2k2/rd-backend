@@ -6,11 +6,12 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-// const allowedOrigins = [process.env.FRONTEND_URL];
+const allowedOrigins = [process.env.FRONTEND_URL];
 
 app.use(
   cors({
-    origin: "https://rd-frontend.onrender.com",
+    // origin: "https://rd-frontend.onrender.com",
+    origin: allowedOrigins,
     credentials: true,
   })
 );

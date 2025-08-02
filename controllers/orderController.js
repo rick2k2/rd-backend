@@ -1,11 +1,12 @@
 const Order = require("../models/orderModel");
 const asyncHandler = require("express-async-handler");
+const generateInvoicePDF = require("../utils/generateInvoicePDF");
 
 // ✅ Place a new order (only if logged in)
 exports.createOrder = asyncHandler(async (req, res) => {
-  const { form, items, total } = req.body;
+  const { form, items, total, payment } = req.body;
 
-  if (!form || !items || !total) {
+  if (!form || !items || !total || !payment || !payment.method) {
     return res.status(400).json({ success: false, message: "Missing fields" });
   }
 
@@ -16,6 +17,11 @@ exports.createOrder = asyncHandler(async (req, res) => {
     address: form.address,
     items,
     total,
+    payment: {
+      method: payment.method,
+      status: payment.status || "Pending",
+      transactionId: payment.transactionId || null,
+    },
     status: "Pending", // ✅ Default status
   });
 
@@ -63,7 +69,7 @@ exports.getMyOrders = asyncHandler(async (req, res) => {
   res.json(orders);
 });
 
-// cancel order  admin
+// ❌ Cancel order (admin only)
 exports.cancelOrderByAdmin = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { cancelledBy, cancelReason } = req.body;
@@ -78,4 +84,16 @@ exports.cancelOrderByAdmin = asyncHandler(async (req, res) => {
   await order.save();
 
   res.json({ message: "Order cancelled" });
+});
+
+// 🧾 Admin Download Bill
+exports.downloadOrderBillByAdmin = asyncHandler(async (req, res) => {
+  const { orderId } = req.params;
+
+  try {
+    await generateInvoicePDF(orderId, res);
+  } catch (err) {
+    console.error("Failed to generate bill:", err);
+    res.status(500).json({ error: "Failed to generate bill" });
+  }
 });

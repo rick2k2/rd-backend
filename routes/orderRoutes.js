@@ -7,6 +7,7 @@ const {
   markOrderDelivered,
   getMyOrders,
   cancelOrderByAdmin,
+  downloadOrderBillByAdmin,
 } = require("../controllers/orderController");
 
 const { protect, admin } = require("../middlewares/authMiddleware");
@@ -22,5 +23,6 @@ router.put("/cancel/:id", cancelOrderByAdmin);
 
 // 👤 Get logged-in user's order history
 router.get("/my", protect, getMyOrders);
+router.get("/bill/:orderId", protect, downloadOrderBillByAdmin);
 
 module.exports = router;
