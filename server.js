@@ -11,7 +11,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://rd-frontend-tau.vercel.app/",
+    origin: "https://rd-frontend-tau.vercel.app",
     credentials: true,
   })
 );
