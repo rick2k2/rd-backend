@@ -252,3 +252,36 @@ exports.resetPassword = async (req, res) => {
       .json({ message: "Password reset failed", error: err.message });
   }
 };
+
+// update user to admin by admin
+exports.updateUserByAdmin = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Update fields if provided
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+
+    if (req.body.isAdmin !== undefined) {
+      user.isAdmin = req.body.isAdmin;
+    }
+
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      message: "✅ User updated successfully",
+      user: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error in updateUserByAdmin:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

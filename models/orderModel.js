@@ -17,12 +17,12 @@ const paymentSchema = new mongoose.Schema(
   {
     method: {
       type: String,
-      enum: ["Cash on Delivery", "Online", "Card", "UPI"],
+      enum: ["Cash on Delivery", "Online"],
       required: true,
     },
     status: {
       type: String,
-      enum: ["Pending", "Paid", "Failed"],
+      num: ["pending", "approved", "failed"],
       default: "Pending",
     },
     transactionId: {
@@ -49,7 +49,7 @@ const orderSchema = new mongoose.Schema({
   },
   total: { type: Number, required: true },
 
-  payment: paymentSchema, // ✅ Payment details added here
+  payment: paymentSchema,
 
   status: {
     type: String,

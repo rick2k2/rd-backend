@@ -10,6 +10,7 @@ const {
   testinguser,
   forgotPassword,
   resetPassword,
+  updateUserByAdmin,
 } = require("../controllers/userController");
 
 const { protect, admin } = require("../middlewares/authMiddleware");
@@ -24,5 +25,6 @@ router.get("/:id", getUserById);
 router.put("/update", protect, upload.single("profileImage"), updateUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.put("/:id/admin", protect, admin, updateUserByAdmin);
 
 module.exports = router;

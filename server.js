@@ -34,6 +34,9 @@ app.use("/api/cart", cartRoutes);
 const orderRoutes = require("./routes/orderRoutes");
 app.use("/api/orders", orderRoutes);
 
+const paymentRoutes = require("./routes/paymentRoutes");
+app.use("/api/payments", paymentRoutes);
+
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api/admin", adminRoutes);
 
@@ -42,6 +45,9 @@ app.use("/api/posts", postRoutes);
 
 const billRoutes = require("./routes/billRoutes");
 app.use("/api/bills", billRoutes);
+
+const contactRoutes = require("./routes/contactRoute");
+app.use("/api/contact", contactRoutes);
 
 app.get("/", (req, res) => {
   res.send(`<h1>Welcome to the Rick Dresses API!</h1>`);
