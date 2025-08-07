@@ -26,12 +26,12 @@ exports.createProduct = asyncHandler(async (req, res) => {
     discountPercent,
   } = req.body;
 
-  const image = req.file ? req.file.path : null;
-
-  if (!name || !price || !image) {
+  if (!name || !price || !req.file) {
     return res.status(400).json({ message: "Missing required fields" });
   }
-
+  const result = await cloudinary.uploader.upload(req.file.path, {
+    folder: "RickDresses/products",
+  });
   const discount = discountPercent || 0;
   const offerPrice = price - (price * discount) / 100;
 
@@ -42,7 +42,10 @@ exports.createProduct = asyncHandler(async (req, res) => {
     category,
     countInStock,
     description,
-    image,
+    image: {
+      url: result.secure_url,
+      public_id: result.public_id,
+    },
     discountPercent: discount,
     offerPrice,
   });
@@ -55,7 +58,9 @@ exports.createProduct = asyncHandler(async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: "Product not found" });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
     res.json(product);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -86,14 +91,19 @@ exports.updateProduct = asyncHandler(async (req, res) => {
     product.description = description || product.description;
     product.discountPercent =
       discountPercent !== undefined ? discountPercent : product.discountPercent;
-
-    // Recalculate offerPrice
     product.offerPrice =
       product.price - (product.price * product.discountPercent) / 100;
-
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path);
-      product.image = result.secure_url;
+      if (product.image && product.image.public_id) {
+        await cloudinary.uploader.destroy(product.image.public_id);
+      }
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "RickDresses/products",
+      });
+      product.image = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
     }
 
     const updatedProduct = await product.save();
@@ -106,13 +116,22 @@ exports.updateProduct = asyncHandler(async (req, res) => {
 // Delete product by ID
 exports.deleteProduct = async (req, res) => {
   try {
-    const deleted = await Product.findByIdAndDelete(req.params.id);
-    if (!deleted) {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json({ message: "Product deleted successfully" });
+    if (product.image && product.image.public_id) {
+      await cloudinary.uploader.destroy(product.image.public_id);
+    }
+    await product.deleteOne();
+    res.status(200).json({
+      message: "Product and associated image deleted successfully",
+    });
   } catch (err) {
-    res.status(500).json({ message: "Failed to delete product", error: err });
+    res.status(500).json({
+      message: "Failed to delete product",
+      error: err.message,
+    });
   }
 };
 
@@ -149,4 +168,100 @@ exports.increaseStock = asyncHandler(async (req, res) => {
     message: "Stock increased",
     countInStock: product.countInStock + 1,
   });
+});
+
+// product review
+exports.createProductReview = asyncHandler(async (req, res) => {
+  const { rating, comment } = req.body;
+
+  // Find the product by ID
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  // Check if the user already reviewed this product
+  const alreadyReviewed = product.reviews.find(
+    (review) => review.user.toString() === req.user._id.toString()
+  );
+
+  if (alreadyReviewed) {
+    return res.status(400).json({ message: "Product already reviewed" });
+  }
+
+  // Create the review object
+  const review = {
+    name: req.user.name,
+    profileimage: req.user.profileImage || "", // fallback to empty string if undefined
+    rating: Number(rating),
+    comment,
+    user: req.user._id,
+  };
+
+  // Add the review to product
+  product.reviews.push(review);
+
+  // Update total number of reviews
+  product.numReviews = product.reviews.length;
+
+  // Update average rating
+  product.rating =
+    product.reviews.reduce((acc, review) => acc + review.rating, 0) /
+    product.reviews.length;
+
+  // Save the updated product
+  await product.save();
+
+  res.status(201).json({ message: "Review added successfully" });
+});
+
+// show all review by admin
+exports.getAllReviews = asyncHandler(async (req, res) => {
+  try {
+    const products = await Product.find({});
+    const allReviews = [];
+
+    products.forEach((product) => {
+      product.reviews?.forEach((review) => {
+        allReviews.push({
+          productId: product._id,
+          productName: product.name,
+          reviewId: review._id,
+          name: review.name,
+          profileImage: review.profileimage,
+          rating: review.rating,
+          comment: review.comment,
+        });
+      });
+    });
+
+    res.status(200).json(allReviews);
+  } catch (error) {
+    console.error("Error in getAllReviews:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// delete specific review by admin
+exports.deleteReviewByAdmin = asyncHandler(async (req, res) => {
+  const { productId, reviewId } = req.params;
+  const product = await Product.findById(productId);
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+  const reviewIndex = product.reviews.findIndex(
+    (review) => review._id.toString() === reviewId
+  );
+  if (reviewIndex === -1) {
+    return res.status(404).json({ message: "Review not found" });
+  }
+  product.reviews.splice(reviewIndex, 1);
+  // recalculate rating and numReviews
+  product.numReviews = product.reviews.length;
+  product.rating =
+    product.reviews.reduce((acc, item) => item.rating + acc, 0) /
+      product.reviews.length || 0;
+  await product.save();
+  res.status(200).json({ message: "Review deleted successfully" });
 });

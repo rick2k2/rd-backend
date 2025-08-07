@@ -124,7 +124,7 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-// update user
+// update by user
 // Update User Profile
 exports.updateUser = async (req, res) => {
   try {

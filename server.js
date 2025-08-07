@@ -7,10 +7,10 @@ dotenv.config();
 const app = express();
 
 // const allowedOrigins = [process.env.FRONTEND_URL];
+// origin: allowedOrigins,
 
 app.use(
   cors({
-    // origin: allowedOrigins,
     origin: "https://rickdresses.vercel.app",
     credentials: true,
   })

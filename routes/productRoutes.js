@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const { protect, admin } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/upload");
 
 const {
@@ -11,6 +11,9 @@ const {
   updateProduct,
   reduceStock,
   increaseStock,
+  createProductReview,
+  getAllReviews,
+  deleteReviewByAdmin,
 } = require("../controllers/productController");
 
 // Create new product with image upload
@@ -33,5 +36,12 @@ router.patch("/reduce-stock/:id", reduceStock);
 
 // increase product countInstock when it is removed from cart
 router.patch("/increase-stock/:id", increaseStock);
+
+// product review by user
+router.post("/:id/review", protect, createProductReview);
+
+// get all review admin
+router.get("/admin/reviews", getAllReviews);
+router.delete("/delete/reviews/:productId/:reviewId", deleteReviewByAdmin);
 
 module.exports = router;

@@ -5,6 +5,7 @@ const Post = require("../models/postModel");
 const Bill = require("../models/billModel");
 const Payment = require("../models/paymentModel");
 const Contact = require("../models/contactModel");
+const Reviews = require("../models/contactModel");
 const asyncHandler = require("express-async-handler");
 
 exports.getAdminStats = asyncHandler(async (req, res) => {
@@ -16,6 +17,12 @@ exports.getAdminStats = asyncHandler(async (req, res) => {
   const totalPayments = await Payment.countDocuments();
   const totalContacts = await Contact.countDocuments();
 
+  const products = await Product.find({});
+  let totalReviews = 0;
+  products.forEach((product) => {
+    totalReviews += product.reviews.length;
+  });
+
   res.json({
     totalProducts,
     totalOrders,
@@ -24,5 +31,6 @@ exports.getAdminStats = asyncHandler(async (req, res) => {
     totalBills,
     totalPayments,
     totalContacts,
+    totalReviews,
   });
 });
