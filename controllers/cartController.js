@@ -25,20 +25,20 @@ exports.addToCart = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc Get cart items
+// Get cart items
 exports.getCart = asyncHandler(async (req, res) => {
   const items = await CartItem.find({ user: req.user._id }).populate("product");
   res.json(items);
 });
 
-// @desc Remove item
+// Remove item
 exports.removeFromCart = asyncHandler(async (req, res) => {
   const { id } = req.params;
   await CartItem.findOneAndDelete({ _id: id, user: req.user._id });
   res.json({ message: "Item removed" });
 });
 
-// @desc Update quantity
+// Update quantity
 exports.updateCartQuantity = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;
