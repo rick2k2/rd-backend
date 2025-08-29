@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   createBill,
   getAllBills,
+  getBillById,
   updateBill,
   deleteBill,
   getDueBills,
@@ -15,6 +16,9 @@ router.post("/create", createBill);
 // Get all bills
 router.get("/all", getAllBills);
 
+// Get single bill by ID
+router.get("/:id", getBillById);
+
 // Update bill
 router.put("/update/:id", updateBill);
 
@@ -22,7 +26,7 @@ router.put("/update/:id", updateBill);
 router.delete("/:id", deleteBill);
 
 // Show only bills with dues
-router.get("/due", getDueBills);
+router.get("/due/bill-data", getDueBills);
 
 // Pay a due amount
 router.put("/pay/:id", makePayment);

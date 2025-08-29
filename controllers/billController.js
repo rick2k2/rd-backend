@@ -23,15 +23,44 @@ exports.getAllBills = async (req, res) => {
   }
 };
 
+// Get single bill by ID
+exports.getBillById = async (req, res) => {
+  try {
+    const bill = await Bill.findById(req.params.id);
+    if (!bill) return res.status(404).json({ message: "Bill not found" });
+    res.json(bill);
+  } catch (err) {
+    console.error("Error fetching bill:", err);
+    res.status(500).json({ message: "Error fetching bill" });
+  }
+};
+
 // Update bill by ID
 exports.updateBill = async (req, res) => {
   try {
-    const updatedBill = await Bill.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!updatedBill) {
+    const existingBill = await Bill.findById(req.params.id);
+
+    if (!existingBill) {
       return res.status(404).json({ message: "Bill not found" });
     }
+
+    // Merge existing bill data with new data
+    const updatedData = {
+      customerName: req.body.customerName || existingBill.customerName,
+      phone: req.body.phone || existingBill.phone,
+      address: req.body.address || existingBill.address,
+      items: req.body.items || existingBill.items,
+      totalAmount: req.body.totalAmount || existingBill.totalAmount,
+      paidAmount: req.body.paidAmount || existingBill.paidAmount,
+      date: req.body.date || existingBill.date, // keep old date if not updated
+    };
+
+    const updatedBill = await Bill.findByIdAndUpdate(
+      req.params.id,
+      updatedData,
+      { new: true }
+    );
+
     res.json(updatedBill);
   } catch (err) {
     console.error("Error updating bill:", err);
@@ -52,6 +81,7 @@ exports.deleteBill = async (req, res) => {
     res.status(500).json({ message: "Error deleting bill" });
   }
 };
+
 // Get only bills that have due amount (total > paid)
 exports.getDueBills = async (req, res) => {
   try {
