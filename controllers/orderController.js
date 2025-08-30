@@ -91,7 +91,7 @@ exports.createOrder = asyncHandler(async (req, res) => {
     </p>
 
     <div style="text-align:center;margin-top:25px;">
-      <a href="${process.env.FRONTEND_URL}/admin/orders" style="background:#ff6600;color:#fff;padding:12px 24px;border-radius:5px;text-decoration:none;font-size:16px;">
+      <a href="https://rickdresses.vercel.app/admin/orders" style="background:#ff6600;color:#fff;padding:12px 24px;border-radius:5px;text-decoration:none;font-size:16px;">
         View Order in Admin Panel
       </a>
     </div>
