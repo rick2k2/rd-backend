@@ -184,18 +184,7 @@ exports.createProductReview = asyncHandler(async (req, res) => {
   product.rating =
     product.reviews.reduce((acc, r) => acc + r.rating, 0) /
     product.reviews.length;
-
   await product.save();
-
-  // 🟢 Add new review notification
-  req.io.emit("newReview", {
-    productId: product._id,
-    productName: product.name,
-    rating,
-    comment,
-    user: req.user.name,
-  });
-
   res.status(201).json({ message: "Review added successfully" });
 });
 

@@ -1,6 +1,7 @@
 const Order = require("../models/orderModel");
 const asyncHandler = require("express-async-handler");
 const generateInvoicePDF = require("../utils/generateInvoicePDF");
+const sendEmail = require("../utils/sendEmail");
 
 // ✅ Create a new order
 exports.createOrder = asyncHandler(async (req, res) => {
@@ -27,6 +28,93 @@ exports.createOrder = asyncHandler(async (req, res) => {
   });
 
   await newOrder.save();
+
+  // ✅ Generate HTML template for email
+  const orderItemsHTML = items
+    .map(
+      (item) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #eee; text-align: left;">
+          ${item.name}
+        </td>
+        <td style="padding: 8px; border: 1px solid #eee; text-align: center;">
+          ${item.quantity}
+        </td>
+        <td style="padding: 8px; border: 1px solid #eee; text-align: right;">
+          ₹${item.price}
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+
+  const htmlTemplate = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rick Dresses Online - New Order</title>
+</head>
+<body style="margin:0;padding:0;background:#f7f7f7;font-family:Arial,sans-serif;">
+  <div style="max-width:600px;margin:auto;background:#ffffff;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+    <div style="text-align:center;padding-bottom:15px;border-bottom:1px solid #eee;">
+      <h1 style="color:#ff6600;margin:0;font-size:24px;">Rick Dresses Online</h1>
+      <p style="color:#555;margin-top:5px;">🛍️ New Order Notification</p>
+    </div>
+
+    <p style="color:#333;font-size:16px;">Hello Admin,</p>
+    <p style="color:#333;font-size:16px;">A new order has been placed on <b>Rick Dresses Online</b>.</p>
+
+    <h3 style="color:#ff6600;margin-top:20px;">Customer Details</h3>
+    <p><b>Name:</b> ${form.name}</p>
+    <p><b>Phone:</b> ${form.phone}</p>
+    <p><b>Address:</b> ${form.address}</p>
+    <p><b>Payment Method:</b> ${payment.method}</p>
+
+    <h3 style="color:#ff6600;margin-top:20px;">Order Summary</h3>
+    <table style="width:100%;border-collapse:collapse;margin-top:10px;">
+      <thead>
+        <tr>
+          <th style="padding:8px;border:1px solid #eee;text-align:left;background:#ff6600;color:#fff;">Product</th>
+          <th style="padding:8px;border:1px solid #eee;text-align:center;background:#ff6600;color:#fff;">Qty</th>
+          <th style="padding:8px;border:1px solid #eee;text-align:right;background:#ff6600;color:#fff;">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${orderItemsHTML}
+      </tbody>
+    </table>
+
+    <p style="font-size:18px;margin-top:15px;color:#000;">
+      <b>Total Amount: ₹${total}</b>
+    </p>
+
+    <div style="text-align:center;margin-top:25px;">
+      <a href="${process.env.FRONTEND_URL}/admin/orders" style="background:#ff6600;color:#fff;padding:12px 24px;border-radius:5px;text-decoration:none;font-size:16px;">
+        View Order in Admin Panel
+      </a>
+    </div>
+
+    <p style="margin-top:25px;color:#777;font-size:13px;text-align:center;">
+      This is an automated email from <b>Rick Dresses Online</b>.
+    </p>
+  </div>
+</body>
+</html>
+`;
+
+  // ✅ Send email to admin
+  try {
+    await sendEmail(
+      process.env.EMAIL_USER,
+      "🛍️ New Order Placed - Rick Dresses Online",
+      htmlTemplate
+    );
+    console.log("✅ HTML email sent to admin successfully!");
+  } catch (error) {
+    console.error("❌ Failed to send email:", error);
+  }
 
   res.status(201).json({
     success: true,
